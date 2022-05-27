@@ -1,7 +1,7 @@
-from Plant import MainClass
+from abstraction.abstract_plant import AbstactPlant
 import random
 
-class Tree(MainClass):
+class Tree(AbstactPlant):
     def __init__(self, coordinates, garden):
         super().__init__(garden)
         self.index = 0
@@ -63,3 +63,6 @@ class Tree(MainClass):
     def water(self):
         self.watered = True
         return self
+    
+    def attack_plant(self):
+        return super().attack_plant()

@@ -1,6 +1,6 @@
 import os
 import pickle
-from Gamemap import World
+from world.gamemap import World
 print("Chose first command : 'start' or 'load' from file")
 command_for_start = ""
 

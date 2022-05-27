@@ -1,6 +1,8 @@
 import random
 
-class Weather:    
+from abstraction.abstract_weather import AbstactWeather
+
+class Weather(AbstactWeather):    
     def __init__(self, world=None):
         if world is not None:
             self.world = world

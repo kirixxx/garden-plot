@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-class MainClass(ABC):
+
+class AbstactPlant(ABC):
 
     def __init__(self, world=None):
         if world is not None:
@@ -18,20 +19,34 @@ class MainClass(ABC):
         self.hungry = True
         self.weed = False
         
+    @abstractmethod    
     def attack_plant(self):
         pass
-
+    
+    @abstractmethod
     def aging(self):
         pass
-
+    
+    @abstractmethod
     def get_position(self):
         pass
-
+    
+    @abstractmethod
     def grow_up(self):
         pass
-
+    
+    @abstractmethod
     def opportunity_to_live(self):
         pass
-
-
-
+    
+    @abstractmethod
+    def get_illness_check(self):
+        pass
+    
+    @abstractmethod
+    def get_rid_of_illness_check(self):
+        pass
+    
+    @abstractmethod
+    def water(self):
+        pass

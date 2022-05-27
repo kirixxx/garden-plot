@@ -1,71 +1,12 @@
-from Plant import MainClass
-from Tree import Tree
-from Vegetables import Carrot
-from Pest import Pest
-from Weather import Weather
+from mobs.tree import Tree
+from mobs.vegetables import Carrot
+from mobs.pest import Pest
+from mobs.weather import Weather
 import random
 import pickle
+from world.cell import Cell
+
 class World:
-    class Cell:
-        coordinates = tuple()
-        all_in_cell = list()#не только растения
-        list_for_print = list()
-        new_list = list()
-
-        def __init__(self, coordinates: tuple):
-            self._coordinates = coordinates
-            self.all_in_cell = list()
-            self.list_for_print = list()
-
-        def add_plant_on_cell(self, plant):# любая сущность
-            if len(self.all_in_cell) < 4:
-                self.all_in_cell.append(plant)
-                self.list_for_print.append(plant.symbol_on_map)
-            else:
-                return
-  
-           
-        def add_weed_on_cell(self, count, plant):
-            if self.all_in_cell[count].type_id == 1:
-                d = "C!"
-            if self.all_in_cell[count].type_id == 2:
-                d = "P!"
-            if self.all_in_cell[count].type_id == 3:
-                d = "T!"
-            self.list_for_print.pop(count)
-            self.list_for_print.insert(count, d)
-            
-        def delete_weed_from_cell(self,count, plant):
-            self.list_for_print.pop(count)
-            self.list_for_print.insert(count, plant.symbol_on_map)
-               
-        def check_to_add_in_cell(self):
-            if len(self.all_in_cell) < 4:
-                return True
-            else:
-                return False
-
-        def print_cell(self):
-            if len(self.list_for_print) != 0:
-                return self.list_for_print
-            
-            else:
-                return "*"                
-
-        def get_cell_position(self, smth, index: int):
-            count = 0
-            for plant in self.all_in_cell:
-                if plant.type_id == smth.type_id and plant.index == index :
-                    return count
-                else:
-                    count += 1
-
-        def remove_smth_from_cell(self, smth: MainClass):
-            for i in  self.all_in_cell:
-                if i.index ==  smth.index:
-                    self.all_in_cell.remove(i)
-                    self.list_for_print.remove(i.symbol_on_map)
-    
     game_map = list()
     map_size = tuple()
     plants = list()
@@ -76,8 +17,8 @@ class World:
     died_from_pests = 0
     died_from_hungry = 0
     died_from_illness = 0
-    weather_today_is = ""  # погодка
-    index = 0#уникальный для каждой сущности(показывает порядковый номер добавления в сад)
+    weather_today_is = ""
+    index = 0
     count_of_days = 0
     map_open_position = tuple()
 
@@ -86,7 +27,7 @@ class World:
         for i in range(0, map_size[0]):
             row = list()
             for j in range(0, map_size[1]):
-                row.append(World.Cell([i, j]))
+                row.append(Cell([i, j]))
             self.game_map.append(row)
 
     def find_open_position(self):
@@ -96,7 +37,7 @@ class World:
             return self.find_open_position()
         else:
             return (x, y)
-    #def check_to_add_in_cell(self):
+
     def find_plant_position(self):
         for x in range(self.map_size[0]):
             for y in range(self.map_size[1]):
@@ -151,7 +92,6 @@ class World:
         for row in self.game_map:
             for Cell in row:
                 print(Cell.print_cell())
-           # print("")
 
     def aging_in_map(self):
         for smth in self.plants:
@@ -176,9 +116,9 @@ class World:
             plant = plant.get_illness_check()
             plant = plant.grow_up(self.count_of_days)
         if self.weather.weather_par == "drought":
-            if not plant.watered:  #если не полито, то -10 хп и никакого роста
+            if not plant.watered:
                 plant.life_points -= 10
-            if plant.watered:  #если полито, растём
+            if plant.watered:
                 plant = plant.grow_up(self.count_of_days)
         if plant is not None:
             self.harvest_of_vegetables += 1
@@ -201,9 +141,9 @@ class World:
             tree = tree.get_illness_check()
             tree = tree.grow_up(self.count_of_days)
         if self.weather.weather_par == "drought":
-            if not tree.watered:  #если не полито, то -20 хп и никакого роста
+            if not tree.watered:
                 tree.life_points -= 20
-            if tree.watered:  #если полито, растём
+            if tree.watered:
                 tree = tree.grow_up(self.count_of_days)
             if tree is not None:
                     self.harvest_of_apples += 1       
@@ -273,7 +213,7 @@ class World:
         for smth in self.plants:
             if smth.type_id == 1 or smth.type_id == 3:
                 smth = smth.water()
-        print("Plants watered!")  #чекаем сработало ли
+        print("Plants watered!")
 
     def want_to_water_plants(self):
         print("weather today:", self.weather.weather_par)
@@ -303,13 +243,12 @@ class World:
     def step_save(self):
         file = open(r'saved_game.txt', 'wb')
         pickle.dump(self, file)
-        for i in range(self.map_size[0]):  # по строке
+        for i in range(self.map_size[0]):
             for j in range(self.map_size[1]):
                 pickle.dump(self.game_map[i][j], file)
         for smth in self.plants:
             pickle.dump(smth, file)
         file.close()
-       # print("garden is saved"
 
     def plants_info(self, position_x: int, position_y: int, position_z: int):
         x = int(position_x)
@@ -391,9 +330,8 @@ class World:
 
     def commands(self, command: str):
         try:
-           # command = command.split(" ")
             if command == "garden_info":
-                print("died from pests", self.died_from_pests)# от вредителей в целом(все что не урожай)
+                print("died from pests", self.died_from_pests)
                 print("died from hungry", self.died_from_hungry)
                 print("harvest of vegetables", self.harvest_of_vegetables)
                 print("harvest of fruits", self.harvest_of_apples)

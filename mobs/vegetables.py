@@ -1,6 +1,7 @@
-from Plant import MainClass
+from abstraction.abstract_plant import AbstactPlant
 import random
-class Carrot(MainClass):
+
+class Carrot(AbstactPlant):
     def __init__(self, coordinates: tuple, garden):
         super().__init__(garden)
         self.index = 0
@@ -66,3 +67,6 @@ class Carrot(MainClass):
         else:
             self.life_points -= 10  #если растение уже было полито (watered == True), то отнимаем 10 хп
         return self
+    
+    def attack_plant(self):
+        return super().attack_plant()
