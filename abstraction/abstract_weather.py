@@ -8,3 +8,7 @@ class AbstactWeather(ABC):
     @abstractmethod
     def what_weather_today(self):
         pass
+    
+    @abstractmethod
+    def weather_today(self, garden):
+        pass

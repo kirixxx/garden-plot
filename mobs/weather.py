@@ -17,3 +17,13 @@ class Weather(AbstactWeather):
             weather_today = "drought"
         self.weather_par = weather_today
         return self.weather_par
+    
+    def weather_today(self, garden):
+        garden.weather.what_weather_today()
+        if garden.weather.weather_par == "sun" or garden.weather.weather_par == "drought":
+            for smth in garden.plants:
+                smth.watered = False
+        if garden.weather.weather_par == "rain":
+            for smth in garden.plants:
+                smth.watered = True
+        return garden.weather.weather_par

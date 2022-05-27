@@ -1,3 +1,4 @@
+from typing import Set
 from mobs.tree import Tree
 from mobs.vegetables import Carrot
 from mobs.pest import Pest
@@ -5,6 +6,7 @@ from mobs.weather import Weather
 import random
 import pickle
 from world.cell import Cell
+from world.set import Sert
 
 class World:
     game_map = list()
@@ -21,8 +23,9 @@ class World:
     index = 0
     count_of_days = 0
     map_open_position = tuple()
-
-    def __init__(self, map_size: tuple):
+    sert = Sert()
+    
+    def __init__(self, map_size: tuple = [2,2]):
         self.map_size = map_size
         for i in range(0, map_size[0]):
             row = list()
@@ -30,6 +33,22 @@ class World:
                 row.append(Cell([i, j]))
             self.game_map.append(row)
 
+    def start_garden(self):
+        count_of_plants = 3
+        count_of_pests = 3
+        count_of_trees = 3
+        for i in range(0, count_of_pests):
+            self.add_pests_on_game_map()
+        for i in range(0, count_of_plants):
+            self.add_plant_on_game_map()
+        for i in range(0, count_of_trees):
+            self.add_trees_on_game_map()
+        for i in range(0, count_of_pests):
+            self.add_pests_on_game_map()
+        for i in range(0, count_of_plants):
+            self.add_plant_on_game_map()
+        self.step_print()
+        
     def find_open_position(self):
         x = random.randint(0, self.map_size[0] - 1)
         y = random.randint(0, self.map_size[1] - 1)
@@ -199,40 +218,15 @@ class World:
             if pests.type_id == 2:
                 pests.hungry = True
 
-    def weather_today(self):
-        self.weather.what_weather_today()
-        if self.weather.weather_par == "sun" or self.weather.weather_par == "drought":
-            for smth in self.plants:
-                smth.watered = False
-        if self.weather.weather_par == "rain":
-            for smth in self.plants:
-                smth.watered = True
-        return self.weather.weather_par
-
     def watering_in_map(self):
         for smth in self.plants:
             if smth.type_id == 1 or smth.type_id == 3:
                 smth = smth.water()
         print("Plants watered!")
 
-    def want_to_water_plants(self):
-        print("weather today:", self.weather.weather_par)
-        command = ""
-        while command != "y" or command != "n":
-            command = input("water plants? y/n\n")
-            if command == "y":
-                self.commands("water_plants")
-                break
-            elif command == "n":
-                print("no water")
-                break
-            else:
-                print("Wrong command!")
-            
-
     def life_cycle(self):
-        self.weather_today()
-        self.want_to_water_plants()
+        self.weather.weather_today(self)
+        self.sert.want_to_water_plants(self)
         self.plants_grow_up()
         self.trees_grow_up()
         self.eat_plant_on_map()
@@ -251,33 +245,7 @@ class World:
         file.close()
 
     def plants_info(self, position_x: int, position_y: int, position_z: int):
-        x = int(position_x)
-        y = int(position_y)
-        count = int(position_z)
-        if int(count) <= len(self.game_map[x][y].all_in_cell):
-            name = self.game_map[x][y].all_in_cell[count].name
-            print("name:" + name)
-            age = self.game_map[x][y].all_in_cell[count].age
-            print("age:" + str(age))
-            life_points = self.game_map[x][y].all_in_cell[count].life_points
-            print("life points:" + str(life_points))
-            weed = self.game_map[x][y].all_in_cell[count].weed
-            print("weed: " + str(weed))
-            if int(self.game_map[x][y].all_in_cell[count].type_id) == 1 or int(self.game_map[x][y].all_in_cell[count].type_id) == 3:
-                points_to_grow = self.game_map[x][y].all_in_cell[count].start_points
-                print("points to grow up :" + str(points_to_grow))
-                illness = self.game_map[x][y].all_in_cell[count].illness
-                print("illness :" + str(illness))
-                watered = self.game_map[x][y].all_in_cell[count].watered
-                print("watered :" + str(watered))
-            if int(self.game_map[x][y].all_in_cell[count].type_id) == 2:
-                damage = self.game_map[x][y].all_in_cell[count].damage
-                print("damage :" + str(damage))
-                hungry = self.game_map[x][y].all_in_cell[count].hungry
-                print("hungry:" + str(hungry))
-            print("-------------------------------------------")
-        else:
-            raise (print("Wrong coordinates <<z>>"))
+        self.sert.plants_info(self, position_x, position_y, position_z)
        
     def delete_pest_from_garden(self):
         for pests in self.plants:
@@ -290,12 +258,7 @@ class World:
                     y = int(pests.coordinates[1])
                     self.game_map[x][y].remove_smth_from_cell(pests)
                     self.plants.remove(pests)
-                    
-    def spisok(self):
-        for smth in self.plants:
-            print(str(smth.name))
-            
-    
+
     def weeding(self):
         for plant in self.plants:
             if plant.type_id == 1 or plant.type_id == 2 or plant.type_id == 3:
@@ -307,7 +270,6 @@ class World:
                 count = self.game_map[x][y].get_cell_position(plant, index)
                 self.game_map[x][y].delete_weed_from_cell(count, plant)
             
-                    
     def getting_weed(self):
         for plant in self.plants:
                 plant.weed = True
@@ -327,52 +289,5 @@ class World:
                 plant.life_points = 300
                 plant.points_to_grow += 4
                          
-
     def commands(self, command: str):
-        try:
-            if command == "garden_info":
-                print("died from pests", self.died_from_pests)
-                print("died from hungry", self.died_from_hungry)
-                print("harvest of vegetables", self.harvest_of_vegetables)
-                print("harvest of fruits", self.harvest_of_apples)
-            elif command == "weeding":
-                for i in self.plants:
-                    self.weeding()
-                self.count_of_days = 0
-            elif command == "next_day":
-                self.life_cycle()
-                self.count_of_days += 1
-                if self.count_of_days == 3:
-                    for plant in self.plants:
-                        if plant.weed == False:
-                            self.getting_weed()
-            elif command == "add_plant":
-                self.add_plant_on_game_map()
-            elif command == "help":
-                self.fertilizing_game_map()
-            elif command == "add_tree":
-                self.add_trees_on_game_map()
-            elif command == "add_pests":
-                self.add_pests_on_game_map()
-            elif command == "water_plants":
-                self.watering_in_map()
-            elif command == "delete_pests":
-               for i in self.plants:
-                   if i.type_id == 2:
-                       self.delete_pest_from_garden()
-            elif command == "info":
-                try:
-                    x = input()
-                    y = input()
-                    z = input()
-                    if int(x) <= int(self.map_size[0]) and int(y) <= int(self.map_size[1]):
-                        self.plants_info(x, y, z)
-                    else:
-                        raise()
-                except:
-                    print("Wrong coordinates")
-            else:
-                raise()
-            self.step_save()
-        except:
-            print("Wrong command")
+        self.sert.commands(self, command)
